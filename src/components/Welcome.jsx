@@ -11,6 +11,7 @@ export default function Welcome() {
         ).username
       );
     };
+    setUserNameFromLocal();
   }, []);
   return (
     <Container>
