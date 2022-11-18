@@ -5,7 +5,7 @@ import { io } from "socket.io-client";
 import styled from "styled-components";
 import { allUsersRoute, host } from "../utils/APIRoutes";
 // import { allUsersRoute, host } from "../utils/APIRoutes";
-// import ChatContainer from "../components/ChatContainer";
+import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
 
@@ -70,8 +70,7 @@ export default function Chat() {
           {currentChat === undefined ? (
             <Welcome />
           ) : (
-            <></>
-            // <ChatContainer currentChat={currentChat} socket={socket} />
+            <ChatContainer currentChat={currentChat} socket={socket} />
           )}
         </div>
       </Container>
