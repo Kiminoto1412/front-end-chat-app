@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import styled from "styled-components";
 import { allUsersRoute, host } from "../utils/APIRoutes";
-// import { allUsersRoute, host } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
 import Welcome from "../components/Welcome";
@@ -19,6 +18,7 @@ export default function Chat() {
   const [currentUserName, setCurrentUserName] = useState(undefined);
   const [currentUserImage, setCurrentUserImage] = useState(undefined);
 
+  // set user
   useEffect(() => {
     const setFromLocalStorage = async () => {
       if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
@@ -34,12 +34,14 @@ export default function Chat() {
     setFromLocalStorage();
   }, []);
 
-  // useEffect(() => {
-  //   if (currentUser) {
-  //     socket.current = io(host);
-  //     socket.current.emit("add-user", currentUser._id);
-  //   }
-  // }, [currentUser]);
+  // after we have user or change user then we will call socket.io
+  useEffect(() => {
+    if (currentUser) {
+      socket.current = io(host);
+      //ส่ง user ปัจจุบันไปให้socket setที่หลังบ้าน ว่ามีใครออนบ้าง
+      socket.current.emit("add-user", currentUser._id);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const CheckCurrentUser = async () => {
@@ -70,7 +72,7 @@ export default function Chat() {
           {currentChat === undefined ? (
             <Welcome />
           ) : (
-            <ChatContainer currentChat={currentChat} socket={socket} />
+            <ChatContainer currentChat={currentChat} currentUser={currentUser} socket={socket} />
           )}
         </div>
       </Container>

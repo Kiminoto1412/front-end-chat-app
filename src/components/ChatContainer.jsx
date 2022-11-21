@@ -6,45 +6,36 @@ import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
 
-export default function ChatContainer({ currentChat, socket }) {
+export default function ChatContainer({ currentChat, currentUser, socket }) {
   const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const [arrivalMessage, setArrivalMessage] = useState(null);
 
-  // useEffect(async () => {
-  //   const data = await JSON.parse(
-  //     localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-  //   );
-  //   const response = await axios.post(recieveMessageRoute, {
-  //     from: data._id,
-  //     to: currentChat._id,
-  //   });
-  //   setMessages(response.data);
-  // }, [currentChat]);
 
+  //เมื่อกดคุยกับสักคน หรือ เปลี่ยนคนคุยให้fetch chat กับของคนที่จะคุยใหม่
   useEffect(() => {
-    const getCurrentChat = async () => {
-      if (currentChat) {
-        await JSON.parse(
-          localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-        )._id;
-      }
-    };
-    getCurrentChat();
+    const fetchMessage = async () => {
+        if (currentChat) {
+        const response = await axios.post(recieveMessageRoute, {
+          from: currentUser._id,
+          to: currentChat._id,
+        });
+        setMessages(response.data);
+      };
+    }
+    fetchMessage();
   }, [currentChat]);
 
   const handleSendMsg = async (msg) => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
+    await axios.post(sendMessageRoute, {
+      from: currentUser._id,
+      to: currentChat._id,
+      message: msg,
+    });
+
     socket.current.emit("send-msg", {
       to: currentChat._id,
-      from: data._id,
-      msg,
-    });
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
+      from: currentUser._id,
       message: msg,
     });
 
@@ -53,6 +44,7 @@ export default function ChatContainer({ currentChat, socket }) {
     setMessages(msgs);
   };
 
+  //ถ้าคนที่ chat ด้วย onอยู่ และมีmessageมา ให้set messageใหม่เป็น setArrivalMessage แล้วค่อยaddไปที่useEffectอันล่างเพื่อโชว์
   useEffect(() => {
     if (socket.current) {
       socket.current.on("msg-recieve", (msg) => {
@@ -61,6 +53,7 @@ export default function ChatContainer({ currentChat, socket }) {
     }
   }, []);
 
+  // run every time when we have a new arrivalMessage
   useEffect(() => {
     arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage]);
